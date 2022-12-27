@@ -322,6 +322,8 @@ impl OctocrabBuilder {
     pub fn build(self) -> Result<Octocrab> {
         let mut hmap = reqwest::header::HeaderMap::new();
 
+        println!("build.a");
+
         for preview in &self.previews {
             hmap.append(
                 reqwest::header::ACCEPT,
@@ -329,16 +331,20 @@ impl OctocrabBuilder {
             );
         }
 
+        println!("build.b");
+
         let auth_state = match self.auth {
             Auth::None => AuthState::None,
             Auth::Basic{ username, password } => AuthState::BasicAuth { username, password },
             Auth::PersonalToken(token) => {
+                println!("build.c");
                 hmap.append(
                     reqwest::header::AUTHORIZATION,
                     (String::from("Bearer ") + token.expose_secret())
                         .parse()
                         .unwrap(),
                 );
+                println!("build.d");
                 AuthState::None
             }
             Auth::App(app_auth) => AuthState::App(app_auth),
@@ -353,15 +359,21 @@ impl OctocrabBuilder {
             }
         };
 
+
+        println!("build.e");
         for (key, value) in self.extra_headers.into_iter() {
             hmap.append(key, value.parse().unwrap());
         }
+
+        println!("build.f");
 
         let client = reqwest::Client::builder()
             .user_agent("octocrab")
             .default_headers(hmap)
             .build()
             .context(crate::error::HttpSnafu)?;
+
+        println!("build.g");
 
         Ok(Octocrab {
             client,
